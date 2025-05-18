@@ -2,10 +2,10 @@
 ## ML_3
 
 ## Авторы
-- Горбунов Роман, R4160 (romangorbunov91)
-- Иваненко Станислава, R4160 (smthCreate)
-- Волынец Глеб, R4160 (glebvol12)
-- Давыдов Игорь, R4197 (TriglCr)
+- [Горбунов Роман](https://github.com/romangorbunov91), R4160
+- [Иваненко Станислава](https://github.com/smthCreate), R4160
+- [Волынец Глеб](https://github.com/glebvol12), R4160
+- [Давыдов Игорь](https://github.com/TriglCr), R4197
 
 
 ## Исходный датасет
