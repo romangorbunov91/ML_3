@@ -9,11 +9,11 @@
 
 Original             |  Detected
 :-------------------------:|:-------------------------:
-![Original](/readme_images\test_1_origin.jpg)  |  ![Detected](/readme_images\test_1_result.jpg)
+![Original](/readme_images/test_1_origin.jpg)  |  ![Detected](/readme_images/test_1_result.jpg)
 
 Original             |  Detected
 :-------------------------:|:-------------------------:
-![Original](/readme_images\test_2_origin.jpg)  |  ![Detected](/readme_images\test_2_result.jpg)
+![Original](/readme_images/test_2_origin.jpg)  |  ![Detected](/readme_images/test_2_result.jpg)
 
 ## Авторы
 - [Горбунов Роман](https://github.com/romangorbunov91), R4160
