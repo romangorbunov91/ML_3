@@ -1,4 +1,4 @@
-# Resistor color band detector (ML_3)
+# Resistor color-band detector
 
 ## Перечень основных файлов:
 - 'ML_3_train.ipynb' - блокнот с обучением моделей.
