@@ -1,32 +1,27 @@
 import streamlit as st
 import cv2
 import numpy as np
-from PIL import Image
 from ultralytics import YOLO
-from ultralytics.utils.plotting import Colors
 
 # Настройка кастомной палитры цветов
 custom_palette = {
-    0: (0, 0, 0),  # черный
-    1: (255, 0, 0),  # синий
-    2: (42, 42, 165),  # коричневый
-    3: (55, 175, 212),  # золотой
-    4: (0, 255, 0),  # зеленый
-    5: (128, 128, 128),  # серый
-    6: (0, 165, 255),  # оранжевый
-    7: (0, 0, 255),  # красный
-    8: (192, 192, 192),  # серебряный
-    9: (230, 0, 255),  # фиолетовый
-    10: (255, 255, 255),  # белый
-    11: (0, 255, 255)  # желтый
+    0:  [0, 0, 0],        # black
+    1:  [255, 0, 0],      # blue
+    2:  [42, 42, 165],    # brown
+    3:  [55, 175, 212],   # gold
+    4:  [0, 255, 0],      # green
+    5:  [128, 128, 128],  # grey
+    6:  [0, 165, 255],    # orange
+    7:  [0, 0, 255],      # red
+    8:  [192, 192, 192],  # silver
+    9:  [230, 0, 255],    # violet
+    10: [255, 255, 255],  # white
+    11: [0, 255, 255]     # yellow
 }
-
 
 @st.cache_resource
 def load_model():
-    colors = Colors()
-    colors.palette = custom_palette
-    model = YOLO('D:/git/ITMO/ML/ML_3/train_yolov8n/weights/best.pt')
+    model = YOLO('D:/git/ITMO/ML/ML_3/train_yolov8m/weights/best.pt')
     
     return model
 
@@ -43,28 +38,64 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     with st.spinner('Обрабатываем изображение...'):
-        image = Image.open(uploaded_file)
-        image_np = np.array(image)
-
-        if image_np.shape[-1] == 4:
-            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGBA2BGR)
-        else:
-            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-
+        # 'image' in BGR.
+        image = cv2.imdecode(np.frombuffer(uploaded_file.getvalue(), np.uint8), cv2.IMREAD_COLOR)
+        
         model = load_model()
-        results = model(image_np)
-        im_array = results[0].plot(line_width=2)
-        result_image = cv2.cvtColor(im_array, cv2.COLOR_BGR2RGB)
+        results = model(image)
+        names = results[0].names          
 
-        boxes = results[0].boxes
-        class_ids = boxes.cls.int().cpu().tolist()
-        confidences = boxes.conf.cpu().tolist()
+        boxes = results[0].boxes.xyxy.cpu().tolist()
+        class_ids = results[0].boxes.cls.int().cpu().tolist()
+        confidences = results[0].boxes.conf.cpu().tolist()
         class_names = [model.names[id] for id in class_ids]
+        
+        custom_palette = {
+            0:  [0, 0, 0],        # black
+            1:  [255, 0, 0],      # blue
+            2:  [42, 42, 165],    # brown
+            3:  [55, 175, 212],   # gold
+            4:  [0, 255, 0],      # green
+            5:  [128, 128, 128],  # grey
+            6:  [0, 165, 255],    # orange
+            7:  [0, 0, 255],      # red
+            8:  [192, 192, 192],  # silver
+            9:  [230, 0, 255],    # violet
+            10: [255, 255, 255],  # white
+            11: [0, 255, 255]     # yellow
+        }
 
+        # Draw predictions manually
+        for i in range(len(boxes)):
+            x1, y1, x2, y2 = map(int, boxes[i])
+            cls_id = class_ids[i]
+            conf = confidences[i]
+            label = f"{names[cls_id]} {conf:.2f}"
+
+            # Get color from custom color map
+            color = custom_palette.get(cls_id)
+
+            # Draw bounding box
+            cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness=2)
+
+            # Draw label background + text
+            font_scale = 0.6
+            thickness = 2
+            (text_width, text_height), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, thickness)
+
+            # Background rectangle for label
+            cv2.rectangle(image, (x1, y1 - 25), (x1 + text_width, y1), color, -1)
+
+            # White text on top
+            cv2.putText(image, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                        font_scale, (200, 200, 200), thickness) 
+      
         results_df = {
             "Класс": class_names,
             "Уверенность": [f"{conf:.2f}" for conf in confidences]
         }
+        #im_array = results[0].plot(line_width=2)
+        result_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     st.success("✅ Обработка завершена!")
 
@@ -84,7 +115,7 @@ if uploaded_file is not None:
 
         st.download_button(
             label="Скачать результат",
-            data=cv2.imencode('.jpg', im_array)[1].tobytes(),
+            data=cv2.imencode('.jpg', image)[1].tobytes(),
             file_name="result_detection.jpg",
             mime="image/jpeg",
             use_container_width=True
