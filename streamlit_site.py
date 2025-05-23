@@ -21,7 +21,7 @@ custom_palette = {
 
 @st.cache_resource
 def load_model():
-    model = YOLO('D:/git/ITMO/ML/ML_3/train_yolov8m/weights/best.pt')
+    model = YOLO('D:/git/ITMO/ML/ML_3/train_yolov8n/weights/best.pt')
     
     return model
 
@@ -42,7 +42,7 @@ if uploaded_file is not None:
         image = cv2.imdecode(np.frombuffer(uploaded_file.getvalue(), np.uint8), cv2.IMREAD_COLOR)
         
         model = load_model()
-        results = model(image)
+        results = model(image, iou=0.2, conf=0.1)
         names = results[0].names          
 
         boxes = results[0].boxes.xyxy.cpu().tolist()
